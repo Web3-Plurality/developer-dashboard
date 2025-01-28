@@ -6,6 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
+import  axios from "axios"
 
 export default function LoginPage() {
   const [projectName, setProjectName] = useState("")
@@ -31,12 +32,32 @@ export default function LoginPage() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (validateForm()) {
       // In a real application, you would send this data to your backend
       // For now, we'll just navigate to the OTP page
-      router.push("/otp")
+      console.log(email)
+      console.log(website)
+      console.log(projectName)
+
+
+
+      const url = "https://app.plurality.local:443/crm/client/login"
+      const response = await axios.post(url,{
+        email,
+      });
+
+      if (response?.data?.success) {
+        localStorage.setItem("website",website);
+        localStorage.setItem("projectName",projectName);
+        localStorage.setItem("emailId", response.data.emailId);
+        router.push("/otp")
+      }
+      else{
+        console.log("something went wrong with the request")
+      }
+      
     }
   }
 

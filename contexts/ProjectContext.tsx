@@ -7,6 +7,8 @@ interface Project {
   profileName: string
   profileDescription: string
   appUrls: string[]
+  clientAppId: string,
+  clientSecret: string
 }
 
 interface ProjectContextType {

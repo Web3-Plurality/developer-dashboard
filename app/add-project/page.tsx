@@ -8,26 +8,49 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useProjects } from "@/contexts/ProjectContext"
+import axios from "axios"
 
 export default function AddProjectPage() {
   const [logo, setLogo] = useState<File | null>(null)
+  const [logoFile, setLogoFile] = useState<string | ''>("")
   const [profileName, setProfileName] = useState("")
   const [profileDescription, setProfileDescription] = useState("")
   const [appUrls, setAppUrls] = useState("")
   const router = useRouter()
   const { addProject } = useProjects()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const newProject = {
-      logo: logo ? URL.createObjectURL(logo) : null,
-      profileName,
-      profileDescription,
-      appUrls: appUrls.split(",").map((url) => url.trim()),
-    }
 
-    addProject(newProject)
-    router.push("/dashboard")
+
+    const clientId = localStorage.getItem("clientId");
+    const url = "https://app.plurality.local:443/crm/client-app/"
+ 
+      const response = await axios.post(url,{
+        profileName,
+        profileDescription,
+        clientId,
+        domains: appUrls.split(",").map((url) => url.trim()),
+        img: logoFile,
+      });
+
+      if (response?.data) {
+        const newProject = {
+          logo: logo ? URL.createObjectURL(logo) : null,
+          profileName,
+          profileDescription,
+          appUrls: appUrls.split(",").map((url) => url.trim()),
+          clientAppId: response?.data?.clientId,
+          clientSecret: response?.data?.clientSecret
+        }
+        addProject(newProject)
+        router.push("/dashboard")
+      }
+      else{
+        console.log("something went wrong with the request")
+      }
+      
+
   }
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,6 +65,15 @@ export default function AddProjectPage() {
         }
       }
       img.src = URL.createObjectURL(file)
+
+      const reader = new FileReader();
+      reader.onloadend = function () {
+          if (typeof reader.result === 'string') {
+              setLogoFile(reader.result);
+          }
+      };
+      reader.readAsDataURL(file);
+
     }
   }
 

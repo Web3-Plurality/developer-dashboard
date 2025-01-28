@@ -4,7 +4,9 @@ interface Project {
   logo: string | null
   profileName: string
   profileDescription: string
-  appUrls: string[]
+  appUrls: string[],
+  clientAppId: string,
+  clientSecret: string
 }
 
 export default function ProjectCard({ project }: { project: Project }) {
@@ -22,6 +24,8 @@ export default function ProjectCard({ project }: { project: Project }) {
           />
         )}
         <p className="text-sm text-gray-500 mb-2">{project.profileDescription}</p>
+        <p className="text-sm text-gray-500 mb-2">Client Id: {project.clientAppId}</p>
+        <p className="text-sm text-gray-500 mb-2">Client Secret: { project.clientSecret}</p>
         <div>
           <h4 className="font-semibold">App URLs:</h4>
           <ul className="list-disc list-inside">

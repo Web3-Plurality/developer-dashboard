@@ -6,16 +6,39 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
+import axios from "axios"
 
 export default function OTPPage() {
   const [otp, setOtp] = useState("")
   const router = useRouter()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     // In a real application, you would verify the OTP here
     // For now, we'll just navigate to the dashboard
-    router.push("/dashboard")
+    const website = localStorage.getItem("website");
+    const projectName = localStorage.getItem("projectName");
+    const emailId = localStorage.getItem("emailId");
+
+
+    const url = "https://app.plurality.local:443/crm/client/authenticate"
+    const response = await axios.post(url,{
+      code : otp,
+      projectName : projectName,
+      projectWebsite: website,
+      emailId : emailId
+    });
+
+    if (response?.data?.success) {
+      console.log("response otp", response)
+      localStorage.setItem("clientId", response.data.client.id);
+      router.push("/dashboard")
+    }
+    else{
+      console.log("something went wrong with the request")
+    }
+
+
   }
 
   return (

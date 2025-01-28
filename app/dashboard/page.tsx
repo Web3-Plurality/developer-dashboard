@@ -5,9 +5,24 @@ import { PlusCircle } from "lucide-react"
 import ProjectCard from "@/components/ProjectCard"
 import Link from "next/link"
 import { useProjects } from "@/contexts/ProjectContext"
+import { useEffect } from "react"
+import axios from "axios"
 
 export default function DashboardPage() {
   const { projects } = useProjects()
+
+const getClientApps = async()=>{
+  const url = "https://app.plurality.local:443/crm/client";
+  const clientId = localStorage.getItem("clientId")
+  const response = await axios.get(url + "/" + clientId)
+  console.log(response)
+}
+  useEffect(()=>{
+
+    getClientApps()
+    
+
+  },[])
 
   return (
     <div className="container mx-auto p-4">
