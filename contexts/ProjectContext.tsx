@@ -1,31 +1,26 @@
 "use client"
-
 import React, { createContext, useState, useContext, type ReactNode } from "react"
 
 interface Project {
-  logo: string | null
-  profileName: string
-  profileDescription: string
-  appUrls: string[]
   clientAppId: string,
   clientSecret: string
 }
 
 interface ProjectContextType {
-  projects: Project[]
+  project: Project
   addProject: (project: Project) => void
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined)
 
 export function ProjectProvider({ children }: { children: ReactNode }) {
-  const [projects, setProjects] = useState<Project[]>([])
+  const [project, setProject] = useState<Project | null>(null)
 
   const addProject = (project: Project) => {
-    setProjects((prevProjects) => [...prevProjects, project])
+    setProject(project)
   }
 
-  return <ProjectContext.Provider value={{ projects, addProject }}>{children}</ProjectContext.Provider>
+  return <ProjectContext.Provider value={{ project, addProject }}>{children}</ProjectContext.Provider>
 }
 
 export function useProjects() {

@@ -14,6 +14,7 @@ export default function AddProjectPage() {
   const [logo, setLogo] = useState<File | null>(null)
   const [logoFile, setLogoFile] = useState<string | ''>("")
   const [profileName, setProfileName] = useState("")
+  const [isLoading, setIsLoading] = useState(false) // Added loading state
   const [profileDescription, setProfileDescription] = useState("")
   const [appUrls, setAppUrls] = useState("")
   const router = useRouter()
@@ -21,36 +22,33 @@ export default function AddProjectPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
+    setIsLoading(true)
 
     const clientId = localStorage.getItem("clientId");
     const url = "https://app.plurality.local:443/crm/client-app/"
- 
+    const stytchToken = localStorage.getItem("stytchToken");
+    
       const response = await axios.post(url,{
         profileName,
         profileDescription,
         clientId,
         domains: appUrls.split(",").map((url) => url.trim()),
         img: logoFile,
+      },{
+        headers:{
+          Authorization: `Bearer ${stytchToken}`
+        }
       });
 
       if (response?.data) {
-        const newProject = {
-          logo: logo ? URL.createObjectURL(logo) : null,
-          profileName,
-          profileDescription,
-          appUrls: appUrls.split(",").map((url) => url.trim()),
-          clientAppId: response?.data?.clientId,
-          clientSecret: response?.data?.clientSecret
-        }
-        addProject(newProject)
+        addProject(response?.data?.data)
+        setIsLoading(false)
         router.push("/dashboard")
       }
       else{
         console.log("something went wrong with the request")
+        setIsLoading(false)
       }
-      
-
   }
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,8 +121,8 @@ export default function AddProjectPage() {
           </form>
         </CardContent>
         <CardFooter>
-          <Button type="submit" onClick={handleSubmit}>
-            Submit
+          <Button type="submit" onClick={handleSubmit} disabled={isLoading}>
+          {isLoading ? "Submiting..." : "Submit"}
           </Button>
         </CardFooter>
       </Card>
