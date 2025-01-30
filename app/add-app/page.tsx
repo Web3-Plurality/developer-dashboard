@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useProjects } from "@/contexts/ProjectContext"
 import axios from "axios"
+import  NextImage from "next/image"
 
 export default function AddProjectPage() {
   const [logo, setLogo] = useState<File | null>(null)
@@ -94,15 +95,23 @@ export default function AddProjectPage() {
                       className="w-16 h-16 object-cover"
                     />
                   )}
+                  <p className="text-sm text-gray-500">
+                Your logo will be displayed like this in the sign up/login workflow
+                </p>
+                <NextImage src={"/pluralirty-wid-logo.png"} width={200} height={200} alt="your logo at plutrality widget" />
                   <Input id="logo" type="file" onChange={handleLogoUpload} accept="image/*" />
                 </div>
               </div>
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="profileName">Profile Name</Label>
+                <p className="text-sm text-gray-500">Your profile name will be displayed in place of the highlighted text</p>
+                <NextImage src={"/fwc.png"} width={200} height={200} alt="your profile name in plutrality widget"/>
                 <Input id="profileName" value={profileName} onChange={(e) => setProfileName(e.target.value)} />
               </div>
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="profileDescription">Profile Description</Label>
+                <p className="text-sm text-gray-500">Your profile description will be displayed in place of the highlighted text</p>
+                <NextImage src={"/fwc-description.png"} width={200} height={200} alt="your profile description in plutrality widget"/>
                 <Textarea
                   id="profileDescription"
                   value={profileDescription}

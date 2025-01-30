@@ -2,7 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useProjects } from "@/contexts/ProjectContext";
 import { useState } from "react";
 import { IoCopyOutline } from "react-icons/io5";
-
+import { Button } from "./ui/button";
+import axios from "axios";
 
 interface ClientApp {
   logo: string | null
@@ -18,8 +19,9 @@ interface ClientApp {
 export default function AppCard({ app }: { app: ClientApp }) {
   const [copiedStreamId, setCopiedStreamId] = useState(false);
   const [copiedSecret, setCopiedSecret] = useState(false);
+  const [isLoading, setIsLoading] = useState(false) // Added loading state
   const [copiedClientAppId, setCopiedClientAppId] = useState(false);
-
+  const { addProject } = useProjects()
   const { project } = useProjects();
 
   const copyToClipboard = (text: string, field: string) => {
@@ -38,6 +40,35 @@ export default function AppCard({ app }: { app: ClientApp }) {
     }
 
   };
+
+  const rotateSecret = async (clientAppId: string) =>{
+    try {
+      
+    
+    const url = `https://app.plurality.local:443/crm/client-app/rotate-secret/${clientAppId}`
+    const stytchToken = localStorage.getItem("stytchToken");
+     setIsLoading(true);
+      const response = await axios.put(url,{},{
+        headers:{
+          Authorization: `Bearer ${stytchToken}`
+        }
+      });
+
+      if (response?.data?.success) {
+        addProject({
+          clientAppId: clientAppId,
+          clientSecret:response?.data?.clientSecret
+        })
+      
+      }
+      setIsLoading(false);
+  
+    } catch (error) {
+    console.log(error);
+    setIsLoading(false);
+    }
+
+    }
 
   return (
     <Card>
@@ -73,6 +104,7 @@ export default function AppCard({ app }: { app: ClientApp }) {
             ))}
           </ul>
         </div>
+        <Button onClick={()=>{rotateSecret(app.id)}}>{isLoading? "Rotating Secret...": "Rotate Secret"}</Button>
       </CardContent>
     </Card>
   )
