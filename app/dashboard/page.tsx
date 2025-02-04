@@ -82,18 +82,26 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Developer Dashboard</h1>
-      <Button onClick={()=>{logout()}}>Logout</Button>
-       <Button onClick={() => router.push("/add-app")} className="mb-4 rounded-full">
+<div className="container mx-auto p-4">
+  <div className="flex justify-between items-center mb-4">
+    <h1 className="text-2xl font-bold">Developer Dashboard</h1>
+    <div className="flex space-x-4">
+      <Button onClick={() => router.push("/add-app")} className="rounded-full flex items-center">
         <PlusCircle className="mr-2 h-4 w-4" /> Add App
       </Button>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-     { clientApps.map((app) => (
-          <AppCard key={app.id} app={app} />
-        ))}
-      </div>
+      <Button onClick={() => logout()} className="rounded-full flex items-center">
+        Logout
+      </Button>
     </div>
+  </div>
+
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {clientApps.map((app) => (
+      <AppCard key={app.id} app={app} />
+    ))}
+  </div>
+</div>
+
   )
 }
 

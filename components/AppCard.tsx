@@ -34,22 +34,22 @@ export default function AppCard({ app }: { app: ClientApp }) {
       setCopiedSecret(true);
       setTimeout(() => setCopiedSecret(false), 1500); // Hide message after 1.5s
     }
-    else if(field == "appId"){
+    else if (field == "appId") {
       setCopiedClientAppId(true);
       setTimeout(() => setCopiedClientAppId(false), 1500); // Hide message after 1.5s
     }
 
   };
 
-  const rotateSecret = async (clientAppId: string) =>{
+  const rotateSecret = async (clientAppId: string) => {
     try {
-      
-    
-    const url = `https://app.plurality.local:443/crm/client-app/rotate-secret/${clientAppId}`
-    const stytchToken = localStorage.getItem("stytchToken");
-     setIsLoading(true);
-      const response = await axios.put(url,{},{
-        headers:{
+
+
+      const url = `https://app.plurality.local:443/crm/client-app/rotate-secret/${clientAppId}`
+      const stytchToken = localStorage.getItem("stytchToken");
+      setIsLoading(true);
+      const response = await axios.put(url, {}, {
+        headers: {
           Authorization: `Bearer ${stytchToken}`
         }
       });
@@ -57,56 +57,95 @@ export default function AppCard({ app }: { app: ClientApp }) {
       if (response?.data?.success) {
         addProject({
           clientAppId: clientAppId,
-          clientSecret:response?.data?.clientSecret
+          clientSecret: response?.data?.clientSecret
         })
-      
+
       }
       setIsLoading(false);
-  
+
     } catch (error) {
-    console.log(error);
-    setIsLoading(false);
+      console.log(error);
+      setIsLoading(false);
     }
 
-    }
+  }
 
+  const ShortenId = ( id: string,  startLength = 6, endLength = 6 ) => {
+    if (id.length <= startLength + endLength) return id;
+    return (`${id.slice(0, startLength)}******${id.slice(-endLength)}`);
+  };
+
+
+  
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{app.profileName}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {app.logo && (
-          <img
-            src={app.logo || "/placeholder.svg"}
-            alt={`${app.profileName} logo`}
-            className="w-16 h-16 object-cover mb-4"
-          />
-        )}
-            <p onClick={()=>{copyToClipboard(app.streamId, "stream")}}  className="text-sm text-gray-500 mb-2">Stream Id: {app.streamId} <IoCopyOutline/>
-        {copiedStreamId && <span className="text-green-500 text-xs">Copied!</span>}
-        </p>
-        <p onClick={()=>{copyToClipboard(app.id, "appId")}}  className="text-sm text-gray-500 mb-2">Client App Id: {app.id} <IoCopyOutline/>
-        {copiedClientAppId && <span className="text-green-500 text-xs">Copied!</span>}
-        </p>
-        <p className="text-sm text-gray-500 mb-2">Client APP Secret: { project?.clientAppId === app.id ? project.clientSecret : '********************'}
-        { project?.clientAppId === app.id && <IoCopyOutline onClick={()=>{copyToClipboard(project.clientSecret, "secret")}}/>}
-        {copiedSecret && <span className="text-green-500 text-xs">Copied!</span>}
-        </p>
-        { project?.clientAppId === app.id &&<p>Please Copy the secret it will not visible next time</p>}
-        <div>
-          <h4 className="font-semibold">App URLs:</h4>
-          <ul className="list-disc list-inside">
-            {JSON.parse(app.domains).map((url, index) => (
-              <li key={index} className="text-sm">
-                {url}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <Button onClick={()=>{rotateSecret(app.id)}}>{isLoading? "Rotating Secret...": "Rotate Secret"}</Button>
-      </CardContent>
-    </Card>
+    <Card className="transition-transform duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl shadow-md rounded-lg border border-gray-200">
+  <CardHeader>
+    <CardTitle className="text-lg font-bold">{app.profileName}</CardTitle>
+  </CardHeader>
+  <CardContent>
+    {app.logo && (
+      <img
+        src={app.logo || "/placeholder.svg"}
+        alt={`${app.profileName} logo`}
+        className="w-16 h-16 object-cover mb-4 rounded-lg shadow-sm"
+      />
+    )}
+    
+    {/* Stream ID */}
+    <p 
+      onClick={() => copyToClipboard(app.streamId, "stream")} 
+      className="text-sm text-gray-500 mb-2 flex items-center gap-2 cursor-pointer hover:text-gray-700 transition-colors"
+    >
+      Stream Id: {ShortenId(app.streamId)} 
+      <IoCopyOutline className="ml-auto" />
+      {copiedStreamId && <span className="text-green-500 text-xs">Copied!</span>}
+    </p>
+
+    {/* Client App ID */}
+    <p 
+      onClick={() => copyToClipboard(app.id, "appId")} 
+      className="text-sm text-gray-500 mb-2 flex items-center gap-2 cursor-pointer hover:text-gray-700 transition-colors"
+    >
+      Client App Id: {ShortenId(app.id)} 
+      <IoCopyOutline className="ml-auto" />
+      {copiedClientAppId && <span className="text-green-500 text-xs">Copied!</span>}
+    </p>
+
+    {/* Client App Secret */}
+    <p className="text-sm text-gray-500 mb-2 flex items-center gap-2 cursor-pointer">
+      Client APP Secret: {project?.clientAppId === app.id ? ShortenId(project.clientSecret) : '********************'}
+      {project?.clientAppId === app.id && (
+        <IoCopyOutline 
+          className="ml-auto cursor-pointer hover:text-gray-700 transition-colors"  
+          onClick={() => copyToClipboard(project.clientSecret, "secret")} 
+        />
+      )}
+      {copiedSecret && <span className="text-green-500 text-xs">Copied!</span>}
+    </p>
+
+    {project?.clientAppId === app.id && (
+      <p className="text-red-500 text-xs font-semibold">Please copy the secret, it will not be visible next time.</p>
+    )}
+
+    {/* App URLs */}
+    <div className="mt-3">
+      <h4 className="font-semibold">App URLs:</h4>
+      <ul className="list-disc list-inside text-sm text-gray-600">
+        {JSON.parse(app.domains).map((url, index) => (
+          <li key={index} className="hover:text-gray-800 transition-colors">{url}</li>
+        ))}
+      </ul>
+    </div>
+
+    {/* Rotate Secret Button */}
+    <Button 
+      onClick={() => rotateSecret(app.id)} 
+      className="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-all"
+    >
+      {isLoading ? "Rotating Secret..." : "Rotate Secret"}
+    </Button>
+  </CardContent>
+</Card>
   )
 }
 
