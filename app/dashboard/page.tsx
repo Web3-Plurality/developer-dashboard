@@ -25,7 +25,7 @@ export default function DashboardPage() {
   const router = useRouter()
 
   const getClientApps = async () => {
-    const url = "https://app.plurality.local:443/crm/client"
+    const url = "https://app.plurality.local:443/crm/client-app"
     const clientId = localStorage.getItem("clientId")
     const stytchToken = localStorage.getItem("stytchToken");
 
@@ -39,7 +39,7 @@ export default function DashboardPage() {
     }
 
     try {
-      const response = await axios.get(`${url}/${clientId}`,{
+      const response = await axios.get(`${url}/`,{
         headers:{
           Authorization: `Bearer ${stytchToken}`
         }
