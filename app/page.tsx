@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import axios from "axios"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Loader } from "lucide-react"
 
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState("register")
@@ -15,8 +16,20 @@ export default function AuthPage() {
   const [website, setWebsite] = useState("")
   const [email, setEmail] = useState("")
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
-  const [isLoading, setIsLoading] = useState(false) // Added loading state
+  const [isLoading, setIsLoading] = useState(true) // Added loading state
   const router = useRouter()
+
+  // if token is already have then redirect to dashboard
+  useEffect(()=>{
+   const token =  localStorage.getItem("stytchToken")
+    if (token) {
+      router.push("/dashboard")
+    }else{
+      setIsLoading(false);
+    }
+
+  },[])
+
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {}
@@ -69,6 +82,10 @@ export default function AuthPage() {
         setIsLoading(false) // Set loading to false
       }
     }
+  }
+
+  if (!localStorage.getItem("stytchToken") && isLoading) {
+      return <Loader/>
   }
 
   return (

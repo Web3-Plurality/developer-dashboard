@@ -66,7 +66,7 @@ export default function OTPPage() {
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="otp">OTP</Label>
-              <Input id="otp" value={otp} onChange={(e) => setOtp(e.target.value)} placeholder="Enter your OTP" />
+              <Input id="otp" value={otp} onChange={(e) => setOtp(e.target.value.trim())} placeholder="Enter your OTP" />
             </div>
             {error && <div className="mt-4 text-red-500 text-sm">{error}</div>}
           </form>

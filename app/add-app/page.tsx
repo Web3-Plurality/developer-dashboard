@@ -19,6 +19,8 @@ export default function AddProjectPage() {
   const [isLoading, setIsLoading] = useState(false) // Added loading state
   const [profileDescription, setProfileDescription] = useState("")
   const [appUrls, setAppUrls] = useState<string[]>([""])
+  const [error, setError] = useState<string>("");
+  const [isError, setIsError] = useState<boolean>(false);
   const router = useRouter()
   const { addProject } = useProjects()
 
@@ -51,6 +53,24 @@ export default function AddProjectPage() {
     const stytchToken = localStorage.getItem("stytchToken");
 
 
+    // Remove the last URL if it's empty
+    if (appUrls[appUrls.length - 1] === "") {
+      appUrls.pop();
+    }
+
+    const urlRegex = /^(https?:\/\/)?(localhost(:\d+)?|([\da-zA-Z.-]+\.[a-zA-Z]{2,6})(:\d+)?)([/\w .-]*)*\/?$/;
+    
+    // Check if all URLs in the appUrls array are valid
+    const invalidUrl = appUrls.find((url) => !urlRegex.test(url));
+
+    if (invalidUrl) {
+      // If any URL is invalid, show an error and stop submission
+      setError("Please enter a valid URL for all fields.");
+      setIsLoading(false);
+      console.log("Please add valid URLs.");
+      return;
+    }
+
     const response = await axios.post(url, {
       profileName,
       profileDescription,
@@ -67,11 +87,16 @@ export default function AddProjectPage() {
       addProject(response?.data?.data)
       setIsLoading(false)
       router.push("/dashboard")
+      setError("")
+      setIsError(false)
     }
     else {
       console.log("something went wrong with the request")
       setIsLoading(false)
+      setIsError(false)
     }
+
+
   }
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,13 +124,33 @@ export default function AddProjectPage() {
   }
 
   const handleAppUrlChange = (index: number, value: string) => {
+    setIsError(false);
     const newAppUrls = [...appUrls]
     newAppUrls[index] = value
     setAppUrls(newAppUrls)
   }
-  
+
   const addAppUrlField = () => {
-    setAppUrls([...appUrls, ""])
+
+    const urlRegex = /^(https?:\/\/)?(localhost(:\d+)?|([\da-zA-Z.-]+\.[a-zA-Z]{2,6})(:\d+)?)([/\w .-]*)*\/?$/;
+    const lastUrl = appUrls.length - 1;
+
+    // Replace `appUrl` with the new URL you want to validate.
+    const isValidUrl = urlRegex.test(appUrls[lastUrl]); // assuming `appUrl` is the current input URL
+
+
+    if (isValidUrl) {
+
+      setAppUrls([...appUrls, ""])
+      setError("");
+      setIsError(false)
+    }
+    else {
+      setIsError(true);
+      setError("Please enter a valid Url")
+      // console.log("Please enter a valid Url");
+    }
+
   }
 
   const removeAppUrlField = (index: number) => {
@@ -117,7 +162,7 @@ export default function AddProjectPage() {
     <div className="container mx-auto p-4">
       <Card className="w-full max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle>Add New Project</CardTitle>
+          <CardTitle>Add New App</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
@@ -164,6 +209,7 @@ export default function AddProjectPage() {
                 {appUrls.map((url, index) => (
                   <div key={index} className="flex items-center space-x-2 mb-2">
                     <Input
+                      type="url"
                       id={`appUrl-${index}`}
                       value={url}
                       onChange={(e) => handleAppUrlChange(index, e.target.value)}
@@ -176,43 +222,21 @@ export default function AddProjectPage() {
                     )}
                   </div>
                 ))}
+                {error && <div className="mt-4 text-red-500 text-sm">{error}</div>}
                 <Button type="button" variant="outline" size="sm" onClick={addAppUrlField} className="mt-2">
                   <Plus className="h-4 w-4 mr-2" /> Add URL
                 </Button>
               </div>
-
-              {/* Multi Select */}
-              {/*  <div className="max-w-md mx-auto bg-white p-4 rounded-lg shadow-md">
-                <h2 className="text-lg font-bold mb-3">Select Platforms</h2>
-
-                 <div className="grid grid-cols-2 gap-3">
-        {platforms.map(({ platform }) => (
-          <label
-            key={platform}
-            className={`flex items-center space-x-2 p-2 border rounded-md cursor-pointer transition ${
-              selectedPlatforms.includes(platform) ? "bg-blue-100 border-blue-500" : "border-gray-300"
-            }`}
-          >
-            <img src={platformLogos[platform]} alt={platform} className="w-6 h-6" />
-            <span>{platform}</span>
-            <input
-              type="checkbox"
-              className="hidden"
-              checked={selectedPlatforms.includes(platform)}
-              onChange={() => toggleSelection(platform)}
-            />
-          </label>
-        ))}
-      </div> 
-              </div>*/}
-
             </div>
           </form>
         </CardContent>
         <CardFooter>
-          <Button type="submit" onClick={handleSubmit} disabled={isLoading}>
-            {isLoading ? "Submiting..." : "Submit"}
-          </Button>
+          {
+            <Button type="submit" onClick={handleSubmit} disabled={isError} >
+              {isLoading ? "Submiting..." : "Submit"}
+            </Button>
+          }
+
         </CardFooter>
       </Card>
     </div>

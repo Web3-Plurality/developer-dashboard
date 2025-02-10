@@ -128,9 +128,9 @@ export default function AppCard({ app }: { app: ClientApp }) {
     )}
 
     {/* App URLs */}
-    <div className="mt-3">
+    <div className="mt-3 h-24 overflow-y-auto">
       <h4 className="font-semibold">App URLs:</h4>
-      <ul className="list-disc list-inside text-sm text-gray-600">
+      <ul className="list-disc list-inside text-sm  text-gray-600">
         {JSON.parse(app.domains).map((url, index) => (
           <li key={index} className="hover:text-gray-800 transition-colors">{url}</li>
         ))}
